@@ -1,0 +1,45 @@
+[tool.poetry]
+name = "anki-card-create"
+version = "0.1.2"
+description = ""
+readme = "README.md"
+packages = [{include = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+requests = "^2.31.0"
+googletrans = "4.0.0rc1"
+pydantic = "^2.6.4"
+langdetect = "^1.0.9"
+navertts = "^0.3.1"
+
+
+[tool.poetry.group.dev.dependencies]
+pandas = "^2.2.1"
+ipykernel = "^6.29.4"
+ruff = "^0.3.5"
+poethepoet = "^0.25.1"
+pytest = "^8.1.2"
+pytest-mock = "^3.14.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+[tool.poe.tasks]
+test = "pytest tests/"
+lint = "poetry run ruff check src tests --fix"
+format = "poetry run ruff format src tests"
+isort = "poetry run ruff check src tests --select I --fix-only"
+x = ["lint", "format", "isort"]
+
+
+[tool.ruff]
+exclude = [".venv"]
+extend-include = ["*.ipynb"]
+
+[tool.ruff.lint]
+ignore = ["F841"]
+
+[tool.poetry.scripts]
+kanki = "src.main:main"

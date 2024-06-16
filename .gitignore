@@ -1,0 +1,11 @@
+.venv
+./data/example.txt
+data
+*/__pycache__
+*/*.txt
+*.txt
+.pytest_cache
+.ruff_cache
+dist/
+__pycache__
+.DS_Store
