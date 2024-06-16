@@ -1,8 +1,9 @@
 [tool.poetry]
 name = "anki-card-create"
-version = "0.1.2"
+version = "0.1.4"
 description = ""
 readme = "README.md"
+authors = ["PH Lin <phlin@example.com>"]
 packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
@@ -21,6 +22,11 @@ ruff = "^0.3.5"
 poethepoet = "^0.25.1"
 pytest = "^8.1.2"
 pytest-mock = "^3.14.0"
+
+
+[tool.poetry.urls]
+homepage = "https://github.com/phlin0424/anki-card-create"
+repository = "https://github.com/phlin0424/anki-card-create"
 
 [build-system]
 requires = ["poetry-core"]

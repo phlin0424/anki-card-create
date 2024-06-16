@@ -1,0 +1,45 @@
+name: Publish Python Package
+
+on:
+  push:
+    branches:
+      - main 
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Python
+      uses: actions/setup-python@v2
+      with:
+        python-version: '3.11' 
+
+    - name: Install Poetry
+      run: |
+        curl -sSL https://install.python-poetry.org | python3 -
+        export PATH="$HOME/.local/bin:$PATH"
+    
+    - name: Install dependencies
+      run: |
+        poetry install
+      env:
+        POETRY_VIRTUALENVS_CREATE: false
+
+    - name: Test Package
+      run: | 
+        poetry run pytest
+
+    - name: Build package
+      run: |
+        poetry build
+
+    - name: Publish package to PyPI
+      env:
+        TWINE_USERNAME: __token__
+        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      run: |
+        poetry publish --build -u $TWINE_USERNAME -p $TWINE_PASSWORD
