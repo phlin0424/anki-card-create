@@ -39,7 +39,7 @@ jobs:
 
     - name: Setup the PyPI publish token
       run: | 
-        poetry.pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
+        poetry config pypi-token.pypi ${{ secrets.PYPI_TOKEN }}
 
     - name: Publish package to PyPI
       run: |
