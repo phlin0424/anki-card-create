@@ -39,7 +39,7 @@ jobs:
 
     - name: Publish package to PyPI
       env:
-        TWINE_USERNAME: __token__
-        TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        POETRY_HTTP_BASIC_PYPI_USERNAME: __token__
+        POETRY_HTTP_BASIC_PYPI_PASSWORD: ${{ secrets.PYPI_TOKEN }}
       run: |
-        poetry publish --build -u $TWINE_USERNAME -p $TWINE_PASSWORD
+        poetry publish --build
