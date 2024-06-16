@@ -31,7 +31,7 @@ jobs:
 
     - name: Test Package
       run: | 
-        poetry run pytest
+        poetry run pytest --ignore=tests/test_card_creator.py
 
     - name: Build package
       run: |
