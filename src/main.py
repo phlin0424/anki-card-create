@@ -1,6 +1,6 @@
 import argparse
 
-from src.card_creator import AnkiNotes, CardCreator
+from card_creator import AnkiNotes, CardCreator
 
 
 def get_args_parser(known=False):

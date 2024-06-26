@@ -8,9 +8,9 @@ from googletrans import Translator
 from pydantic import BaseModel
 from requests import Response
 
-from src import API_URL, DECK_NAME, DIR_PATH, MODEL_NAME
-from src.models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
-from src.utils import MediaAdditionError, create_audio, create_message
+from config import API_URL, DECK_NAME, DIR_PATH, MODEL_NAME
+from models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
+from utils import MediaAdditionError, create_audio, create_message
 
 
 class AnkiNotes(BaseModel):

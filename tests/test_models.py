@@ -1,4 +1,4 @@
-from src.models import AnkiNoteModel
+from models import AnkiNoteModel
 
 
 def test_anki_note_model():

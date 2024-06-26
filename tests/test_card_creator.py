@@ -3,7 +3,7 @@ import os
 import pytest
 from navertts import NaverTTS
 
-from src.card_creator import AnkiNotes, CardCreator
+from card_creator import AnkiNotes, CardCreator
 
 
 @pytest.fixture(scope="module")

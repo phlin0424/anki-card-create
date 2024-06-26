@@ -1,4 +1,4 @@
-from src.card_creator import AnkiNotes, CardCreator
+from card_creator import AnkiNotes, CardCreator
 
 
 def test_add_note_to_anki(mocker, global_data):

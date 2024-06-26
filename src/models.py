@@ -3,7 +3,7 @@ from typing import Optional, Union
 from langdetect import detect
 from pydantic import BaseModel, model_validator
 
-from src import DECK_NAME, MODEL_NAME
+from config import DECK_NAME, MODEL_NAME
 
 
 class AnkiNoteModel(BaseModel):

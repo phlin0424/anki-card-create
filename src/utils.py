@@ -4,8 +4,8 @@ from typing import Union
 
 from navertts import NaverTTS
 
-from src import MP3_PATH
-from src.models import AnkiNoteResponse, AnkiSendMediaResponse
+from config import MP3_PATH
+from models import AnkiNoteResponse, AnkiSendMediaResponse
 
 
 def create_message(card_create_response: AnkiNoteResponse) -> str:
