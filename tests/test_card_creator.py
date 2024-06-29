@@ -1,9 +1,8 @@
 import os
 
 import pytest
-from navertts import NaverTTS
-
 from card_creator import AnkiNotes, CardCreator
+from navertts import NaverTTS
 
 
 @pytest.fixture(scope="module")

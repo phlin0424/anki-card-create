@@ -2,7 +2,6 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
-from models import AnkiNoteResponse
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,3 @@
-from utils import create_message
 from models import AnkiSendMediaResponse
 
 
