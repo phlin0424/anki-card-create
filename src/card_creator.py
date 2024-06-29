@@ -4,12 +4,11 @@ from pathlib import Path
 from typing import List, Union
 
 import requests
+from config import settings
 from googletrans import Translator
+from models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
 from pydantic import BaseModel
 from requests import Response
-
-from config import API_URL, DECK_NAME, DIR_PATH, MODEL_NAME
-from models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
 from utils import MediaAdditionError, create_audio, create_message
 
 
@@ -24,8 +23,8 @@ class AnkiNotes(BaseModel):
         cls,
         input_str: str,
         translated_word: str = None,
-        deck_name: str = DECK_NAME,
-        model_name: str = MODEL_NAME,
+        deck_name: str = settings.deck_name,
+        model_name: str = settings.model_name,
     ):
         # Translate the word if its not specified.
         if translated_word is None:
@@ -46,9 +45,9 @@ class AnkiNotes(BaseModel):
     @classmethod
     def from_txt(
         cls,
-        data_fname: str = DIR_PATH / "data" / "example.txt",
-        deck_name: str = DECK_NAME,
-        model_name: str = MODEL_NAME,
+        data_fname: str = settings.dir_path / "data" / "example.txt",
+        deck_name: str = settings.deck_name,
+        model_name: str = settings.model_name,
     ):
         """Create a list of notemodel which will be used in creating Anki-notes.
         The translated phrase will be automatically generated from the korean word
@@ -125,7 +124,7 @@ class CardCreator:
         audio_file_path = audio_path.__str__()
         # Store the audio file in Anki's media folder
         response: Response = requests.post(
-            API_URL,
+            settings.api_url,
             json={
                 "action": "storeMediaFile",
                 "version": 6,
@@ -175,7 +174,7 @@ class CardCreator:
 
             # Send the request to AnkiConnect to add the note to the deck
             response = requests.post(
-                API_URL,
+                settings.api_url,
                 json.dumps(
                     {
                         "action": "addNote",

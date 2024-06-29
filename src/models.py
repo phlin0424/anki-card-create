@@ -1,14 +1,13 @@
 from typing import Optional, Union
 
+from config import settings
 from langdetect import detect
 from pydantic import BaseModel, model_validator
 
-from config import DECK_NAME, MODEL_NAME
-
 
 class AnkiNoteModel(BaseModel):
-    deckName: str = DECK_NAME
-    modelName: str = MODEL_NAME
+    deckName: str = settings.deck_name
+    modelName: str = settings.model_name
     front: str
     back: str = None
     sentence: Optional[str] = None

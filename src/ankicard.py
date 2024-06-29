@@ -1,6 +1,7 @@
 import argparse
 
 from card_creator import AnkiNotes, CardCreator
+from config import settings
 
 
 def get_args_parser(known=False):
@@ -21,13 +22,13 @@ def get_args_parser(known=False):
     parser.add_argument(
         "-d",
         "--deck_name",
-        default="korean",
+        default=settings.deck_name,
         help="Name of the Anki deck to which the cards will be added.",
     )
     parser.add_argument(
         "-m",
         "--model_name",
-        default="Basic (裏表反転カード付き)+sentense",
+        default=settings.model_name,
         help="Name of the Anki card model to which the cards will be added.",
     )
 

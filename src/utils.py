@@ -2,10 +2,9 @@ import uuid
 from pathlib import Path
 from typing import Union
 
-from navertts import NaverTTS
-
-from config import MP3_PATH
+from config import settings
 from models import AnkiNoteResponse, AnkiSendMediaResponse
+from navertts import NaverTTS
 
 
 def create_message(card_create_response: AnkiNoteResponse) -> str:
@@ -32,7 +31,9 @@ def create_message(card_create_response: AnkiNoteResponse) -> str:
         return word_being_sent + ": Error adding note to deck"
 
 
-def create_audio(text: str, path: Union[Path, str] = MP3_PATH) -> Union[Path, str]:
+def create_audio(
+    text: str, path: Union[Path, str] = settings.mp3_path
+) -> Union[Path, str]:
     """Create an audio file (.mp3) for the input korean word. Based on Naver TTS API.
 
     Args:
