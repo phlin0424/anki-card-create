@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Dict
 
 import pytest
+import os
+from navertts import NaverTTS
 
 
 @pytest.fixture(scope="session")
@@ -17,18 +19,21 @@ def global_data() -> Dict[str, str]:
     }
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def setup_anki_mock(mocker):
-    # Sample data to mimic the AnkiConnect response
-    expected_response = {
-        "result": 1496198395707,
-        "error": None,
-    }
     # Mock requests.post to return a mock response object with .json() method
-    mocker.patch(
-        "requests.post",
-        return_value=mocker.Mock(status_code=200, json=lambda: expected_response),
-    )
+    mock_anki_invoke = mocker.patch("anki_invoke")
+
+    # Define the side effect function to handle different actions
+    def anki_invoke_side_effect(action, params):
+        if action == "addNote":
+            return {"result": "note added", "error": None}
+        elif action == "storeMediaFile":
+            return {"result": "media stored", "error": None}
+        return {"result": None, "error": "unknown action"}
+
+    mock_anki_invoke.side_effect = anki_invoke_side_effect
+
     yield mocker
 
 
@@ -54,3 +59,26 @@ def response_anki_note(global_data):
         "modelName": global_data["model_name"],
     }
     return response_content
+
+
+@pytest.fixture(scope="module")
+def create_test_data(global_data) -> None:
+    """create the test data at the file path being specified"""
+    input_word = global_data["test_word_in_txt"]
+    file_path = global_data["dir_path"] / global_data["test_file_name"]
+    with open(file_path, "w") as f:
+        for i, word in enumerate(input_word):
+            if i > 0:
+                f.write("\n")
+            f.write(word)
+    yield
+    os.remove(file_path)  # Cleanup after the module tests are done
+
+
+@pytest.fixture(scope="module")
+def create_test_audio(global_data) -> str:
+    tts = NaverTTS(global_data["test_word"])
+    audio_name = global_data["dir_path"] / global_data["audio_name"]
+    tts.save(audio_name)
+    yield audio_name
+    os.remove(audio_name)  # Cleanup after the module tests are done
