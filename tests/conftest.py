@@ -20,24 +20,6 @@ def global_data() -> Dict[str, str]:
 
 
 @pytest.fixture(scope="function")
-def setup_anki_mock(mocker):
-    # Mock requests.post to return a mock response object with .json() method
-    mock_anki_invoke = mocker.patch("anki_invoke")
-
-    # Define the side effect function to handle different actions
-    def anki_invoke_side_effect(action, params):
-        if action == "addNote":
-            return {"result": "note added", "error": None}
-        elif action == "storeMediaFile":
-            return {"result": "media stored", "error": None}
-        return {"result": None, "error": "unknown action"}
-
-    mock_anki_invoke.side_effect = anki_invoke_side_effect
-
-    yield mocker
-
-
-@pytest.fixture(scope="function")
 def response_anki_note(global_data):
     # status_code: int
     # result: Union[None, int]
@@ -59,6 +41,32 @@ def response_anki_note(global_data):
         "modelName": global_data["model_name"],
     }
     return response_content
+
+
+@pytest.fixture(scope="function")
+def setup_anki_mock(mocker, response_anki_note):
+    # Mock requests.post to return a mock response object with .json() method
+    mock_anki_invoke = mocker.patch("card_creator.anki_invoke")
+
+    # Define the side effect function to handle different actions
+    def anki_invoke_side_effect(action, params):
+        if action == "addNote":
+            expected_response = {
+                "result": 1496198395707,
+                "error": None,
+            }
+            return mocker.Mock(status_code=200, json=lambda: expected_response)
+        elif action == "storeMediaFile":
+            expected_response = {
+                "result": "test.mp3",
+                "error": None,
+            }
+            return mocker.Mock(status_code=200, json=lambda: expected_response)
+        return mocker.Mock(status_code=400, json={"error": "not expected actions"})
+
+    mock_anki_invoke.side_effect = anki_invoke_side_effect
+
+    yield mocker
 
 
 @pytest.fixture(scope="module")
