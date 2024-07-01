@@ -1,6 +1,9 @@
 import argparse
-
+from config import settings
 from card_creator import AnkiNotes, CardCreator
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
 def get_args_parser(known=False):
@@ -21,14 +24,25 @@ def get_args_parser(known=False):
     parser.add_argument(
         "-d",
         "--deck_name",
-        default="korean",
+        default=settings.deck_name,
         help="Name of the Anki deck to which the cards will be added.",
     )
     parser.add_argument(
         "-m",
         "--model_name",
-        default="Basic (裏表反転カード付き)+sentense",
+        default=settings.model_name,
         help="Name of the Anki card model to which the cards will be added.",
+    )
+
+    # Arguments to update the
+    parser.add_argument(
+        "--set-deck-name",
+        help="Set a new default deck name for the Anki cards.",
+    )
+
+    parser.add_argument(
+        "--set-model-name",
+        help="Set a new default model name of the Anki cards.",
     )
 
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
@@ -38,7 +52,13 @@ def get_args_parser(known=False):
 def main():
     args = get_args_parser(known=True)
 
-    print(f"deck name: {args.deck_name}; card model: {args.model_name}")
+    if args.set_deck_name:
+        settings.deck_name = args.set_deck_name
+
+    if args.set_model_name:
+        settings.model_name = args.set_model_name
+
+    logging.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
 
     if args.file:
         anki_notes = AnkiNotes.from_txt(
