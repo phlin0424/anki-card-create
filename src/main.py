@@ -1,6 +1,7 @@
 import argparse
 from config import settings
-from card_creator import AnkiNotes, CardCreator
+from card_creator import CardCreator
+from models import AnkiNotes
 import logging
 
 logging.basicConfig(level=logging.INFO)
@@ -27,22 +28,12 @@ def get_args_parser(known=False):
         default=settings.deck_name,
         help="Name of the Anki deck to which the cards will be added.",
     )
+
     parser.add_argument(
         "-m",
         "--model_name",
         default=settings.model_name,
         help="Name of the Anki card model to which the cards will be added.",
-    )
-
-    # Arguments to update the
-    parser.add_argument(
-        "--set-deck-name",
-        help="Set a new default deck name for the Anki cards.",
-    )
-
-    parser.add_argument(
-        "--set-model-name",
-        help="Set a new default model name of the Anki cards.",
     )
 
     opt = parser.parse_known_args()[0] if known else parser.parse_args()
@@ -51,15 +42,9 @@ def get_args_parser(known=False):
 
 def main():
     args = get_args_parser(known=True)
-
-    if args.set_deck_name:
-        settings.deck_name = args.set_deck_name
-
-    if args.set_model_name:
-        settings.model_name = args.set_model_name
-
     logging.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
 
+    # Create notes according to the input word
     if args.file:
         anki_notes = AnkiNotes.from_txt(
             data_fname=args.file,
@@ -73,6 +58,7 @@ def main():
             model_name=args.model_name,
         ).anki_notes
 
+    # Send the notes to Anki
     card_creator = CardCreator(anki_notes)
     response_list = card_creator.send_notes(audio=True)
 
