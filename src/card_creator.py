@@ -1,83 +1,24 @@
 import json
 import os
 from pathlib import Path
-from typing import List, Union
+from typing import List
 
 import requests
 from config import settings
-from googletrans import Translator
 from models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
-from pydantic import BaseModel
 from requests import Response
 from utils import MediaAdditionError, create_audio, create_message
+import logging
+
+logging.basicConfig(level=logging.INFO)
 
 
-class AnkiNotes(BaseModel):
-    """Create Anki notes based on the method user has specified."""
-
-    # A List for the created Anki notes.
-    anki_notes: List[AnkiNoteModel]
-
-    @classmethod
-    def from_input_word(
-        cls,
-        input_str: str,
-        translated_word: str = None,
-        deck_name: str = settings.deck_name,
-        model_name: str = settings.model_name,
-    ):
-        # Translate the word if its not specified.
-        if translated_word is None:
-            translator = Translator()
-            translation = translator.translate(input_str, src="ko", dest="ja")
-            translated_word = translation.text
-
-        # Create the anki model
-        anki_note = AnkiNoteModel(
-            deckName=deck_name,
-            modelName=model_name,
-            front=input_str,
-            back=translated_word,
-        )
-        anki_notes_list = [anki_note]
-        return cls(anki_notes=anki_notes_list)
-
-    @classmethod
-    def from_txt(
-        cls,
-        data_fname: str = settings.dir_path / "data" / "example.txt",
-        deck_name: str = settings.deck_name,
-        model_name: str = settings.model_name,
-    ):
-        """Create a list of notemodel which will be used in creating Anki-notes.
-        The translated phrase will be automatically generated from the korean word
-        listed on the front side.
-
-        Args:
-            data_fname (str, optional): _description_. Defaults to DIR_PATH/"data"/"example.txt".
-
-        Returns:
-            _type_: _description_
-        """
-
-        with open(data_fname, "r") as f:
-            voc_list = f.read().split("\n")
-
-        translator = Translator()
-
-        anki_notes_list = []
-        for word in voc_list:
-            translation = translator.translate(word, src="ko", dest="ja")
-            translated_word = translation.text
-            anki_note = AnkiNoteModel(
-                deckName=deck_name,
-                modelName=model_name,
-                front=word,
-                back=translated_word,
-            )
-            anki_notes_list.append(anki_note)
-
-        return cls(anki_notes=anki_notes_list)
+def anki_invoke(action: str, params: dict):
+    response: Response = requests.post(
+        settings.api_url,
+        json={"action": action, "version": 6, "params": params},
+    )
+    return response
 
 
 class CardCreator:
@@ -92,7 +33,8 @@ class CardCreator:
     def create_response(
         anki_note: AnkiNoteResponse,
         connector_response: requests.Response,
-    ):
+        audio: str = None,
+    ) -> AnkiNoteResponse:
         response_json = connector_response.json()
         response_json["status_code"] = connector_response.status_code
 
@@ -100,6 +42,7 @@ class CardCreator:
         anki_note_dict.update(
             {
                 "status_code": response_json["status_code"],
+                "audio": audio,
                 "result": response_json["result"],
                 "error": response_json["error"],
             }
@@ -108,7 +51,7 @@ class CardCreator:
         return AnkiNoteResponse(**anki_note_dict)
 
     @staticmethod
-    def send_media(audio_path: Union[Path, str]) -> AnkiSendMediaResponse:
+    def send_media(audio_path: Path | str) -> AnkiSendMediaResponse:
         """Send the created mp3 file to Anki collection folder (collection.media/)
 
         Args:
@@ -117,23 +60,20 @@ class CardCreator:
         Returns:
             _type_: _description_
         """
+        # Convert the path into a Path datatype
         if not isinstance(audio_path, Path):
             audio_path = Path(audio_path)
 
+        # Create the payload fot the anki connector request
         audio_filename = audio_path.name.__str__()
         audio_file_path = audio_path.__str__()
-        # Store the audio file in Anki's media folder
-        response: Response = requests.post(
-            settings.api_url,
-            json={
-                "action": "storeMediaFile",
-                "version": 6,
-                "params": {
-                    "filename": audio_filename,
-                    "path": audio_file_path,
-                },
-            },
-        )
+        params = {
+            "filename": audio_filename,
+            "path": audio_file_path,
+        }
+
+        # Send the request
+        response = anki_invoke(action="storeMediaFile", params=params)
 
         return AnkiSendMediaResponse(
             audio_path=audio_file_path,
@@ -171,24 +111,35 @@ class CardCreator:
                     "裏面": anki_note.back,
                 },
             }
+            params = {"note": note}
 
-            # Send the request to AnkiConnect to add the note to the deck
-            response = requests.post(
-                settings.api_url,
-                json.dumps(
-                    {
-                        "action": "addNote",
-                        "version": 6,
-                        "params": {
-                            "note": note,
-                        },
-                    }
-                ),
+            # Send the request to add note into the specified deck, using anki connector
+            response = anki_invoke(action="addNote", params=params)
+
+            # Translate the process result to a readable message
+            if audio:
+                card_create_response = self.create_response(
+                    anki_note=anki_note,
+                    connector_response=response,
+                    audio=media_response.audio_file_name,
+                )
+            else:
+                card_create_response = self.create_response(
+                    anki_note=anki_note,
+                    connector_response=response,
+                )
+            # Append the response message into a list
+            response_json_list.append(card_create_response)
+
+            # Logging the response of creating the cards
+            logging.info(
+                create_message(
+                    card_create_response,
+                )
             )
 
-            # Translate the API response to a readable message
-            card_create_response = self.create_response(anki_note, response)
-            response_json_list.append(card_create_response)
-            print(create_message(card_create_response))
+            # Logging the created audio name of the audio flag is specified
+            if audio:
+                logging.info(f"audio: {media_response.audio_file_name}")
 
         return response_json_list
