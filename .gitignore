@@ -9,4 +9,4 @@ data
 dist/
 __pycache__
 .DS_Store
-tests/pytest.ini
+pytest.ini
