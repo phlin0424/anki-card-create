@@ -42,6 +42,7 @@ def create_audio(
 
     Returns:
         Union[Path, str]: The path of the output audio file.
+            For example: User/path/to/directory/naver_e9633695-8fce-4ea3-901a-489863a9214e.mp3
     """
     # texts = [note.front for note in self._anki_notes]
     if not isinstance(path, Path):
