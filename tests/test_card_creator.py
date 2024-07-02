@@ -48,7 +48,6 @@ def test_send_audio(global_data, create_test_audio, anki2_path):
 
 def test_send_anki_note_with_audio(global_data, anki2_path):
     """TESTCASE3: Create an Anki card with audio"""
-    front_word_for_testing = global_data["test_word"]
     anki_notes = AnkiNotes.from_input_word(
         input_str=global_data["test_word"],
         deck_name=global_data["deck_name"],
@@ -58,4 +57,4 @@ def test_send_anki_note_with_audio(global_data, anki2_path):
     response_list = card_creator.send_notes(audio=True)
 
     assert response_list[0].status_code == 200
-    os.remove(anki2_path / response_list[0].audio)
+    # os.remove(anki2_path / response_list[0].audio)
