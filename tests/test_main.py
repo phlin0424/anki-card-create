@@ -1,8 +1,11 @@
 import pytest
 import sys
 from argparse import Namespace
-from main import get_args_parser
+from main import get_args_parser, main
 from config import settings
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 @pytest.mark.parametrize(
@@ -50,4 +53,43 @@ def test_get_args_parser(args, expected, monkeypatch):
     # Simulate command-line arguments
     monkeypatch.setattr(sys, "argv", ["prog"] + args)
 
-    assert get_args_parser() == expected
+    assert get_args_parser(known=True) == expected
+
+
+# def test_main_word(monkeypatch, global_data, setup_anki_mock):
+#     test_args = [
+#         "prog",
+#         "--w",
+#         "죄송합니다",
+#         "--deck_name",
+#         global_data["deck_name"],
+#         "--model_name",
+#         global_data["model_name"],
+#     ]
+
+#     # Mimic sys.argv
+#     # sys.argv[0] would be "죄송합니다" ... vice versa.
+#     monkeypatch.setattr(sys, "argv", test_args)
+
+#     # Execute the main function
+#     main()
+
+
+# def test_main_file(monkeypatch, create_test_data, global_data, setup_anki_mock):
+#     input_file = global_data["dir_path"] / global_data["test_file_name"]
+#     input_file = input_file.__str__()
+
+#     test_args = [
+#         "prog",
+#         "--f",
+#         input_file,
+#         "--deck_name",
+#         global_data["deck_name"],
+#         "--model_name",
+#         global_data["model_name"],
+#     ]
+#     # Mimic sys.argv
+#     monkeypatch.setattr(sys, "argv", test_args)
+
+#     # Execute the main function
+#     main()

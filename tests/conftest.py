@@ -62,7 +62,9 @@ def setup_anki_mock(mocker, response_anki_note):
                 "error": None,
             }
             return mocker.Mock(status_code=200, json=lambda: expected_response)
-        return mocker.Mock(status_code=400, json={"error": "not expected actions"})
+        return mocker.Mock(
+            status_code=400, json=lambda: {"error": "not expected actions"}
+        )
 
     mock_anki_invoke.side_effect = anki_invoke_side_effect
 
