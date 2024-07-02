@@ -4,7 +4,7 @@ from card_creator import CardCreator
 from models import AnkiNotes
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 def get_args_parser(known=False):
@@ -42,7 +42,7 @@ def get_args_parser(known=False):
 
 def main():
     args = get_args_parser(known=True)
-    logging.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
+    logger.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
 
     # Create notes according to the input word
     if args.file:
