@@ -1,5 +1,6 @@
-from models import AnkiNoteModel, AnkiNotes
 import logging
+
+from models import AnkiNoteModel, AnkiNotes
 
 logger = logging.getLogger(__name__)
 

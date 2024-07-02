@@ -1,12 +1,10 @@
-from typing import Optional
+from pathlib import Path
+from typing import List, Optional
 
 from config import settings
-from langdetect import detect
-from pydantic import BaseModel, model_validator, ConfigDict
-from config import settings
 from googletrans import Translator
-from typing import List
-from pathlib import Path
+from langdetect import detect
+from pydantic import BaseModel, ConfigDict, model_validator
 
 
 class AnkiNoteModel(BaseModel):

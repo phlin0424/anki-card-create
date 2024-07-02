@@ -1,9 +1,10 @@
+import logging
+import os
+from pathlib import Path
+
+import pytest
 from card_creator import CardCreator
 from models import AnkiNotes
-import pytest
-import logging
-from pathlib import Path
-import os
 
 logger = logging.getLogger(__name__)
 

@@ -1,8 +1,9 @@
 import argparse
-from config import settings
-from card_creator import CardCreator
-from models import AnkiNotes
 import logging
+
+from card_creator import CardCreator
+from config import settings
+from models import AnkiNotes
 
 logger = logging.getLogger(__name__)
 

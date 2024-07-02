@@ -1,4 +1,5 @@
 import json
+import logging
 import os
 from pathlib import Path
 from typing import List
@@ -8,7 +9,6 @@ from config import settings
 from models import AnkiNoteModel, AnkiNoteResponse, AnkiSendMediaResponse
 from requests import Response
 from utils import MediaAdditionError, create_audio, create_message
-import logging
 
 logging.basicConfig(level=logging.INFO)
 

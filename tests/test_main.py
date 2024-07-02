@@ -1,9 +1,10 @@
-import pytest
+import logging
 import sys
 from argparse import Namespace
-from main import get_args_parser, main
+
+import pytest
 from config import settings
-import logging
+from main import get_args_parser
 
 logger = logging.getLogger(__name__)
 
