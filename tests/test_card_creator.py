@@ -5,7 +5,7 @@ import logging
 from pathlib import Path
 import os
 
-logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
 @pytest.fixture
@@ -55,6 +55,6 @@ def test_send_anki_note_with_audio(global_data, anki2_path):
     ).anki_notes
     card_creator = CardCreator(anki_notes)
     response_list = card_creator.send_notes(audio=True)
-
+    logger.info(anki2_path / response_list[0].audio)
     assert response_list[0].status_code == 200
     # os.remove(anki2_path / response_list[0].audio)

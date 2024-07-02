@@ -1,8 +1,11 @@
 from models import AnkiNoteModel, AnkiNotes
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 def test_anki_note_model():
-    """test 1: Create a note by manually input the text"""
+    """TESTCASE1: Create a note by manually input the text"""
     note = AnkiNoteModel(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
@@ -18,7 +21,8 @@ def test_anki_note_model():
 
 
 def test_anki_note_model_no_back():
-    """test 2: Create a note by manually input the text without back"""
+    """TESTCASE2: Create a note by manually input the text without back"""
+
     note = AnkiNoteModel(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
@@ -32,10 +36,14 @@ def test_anki_note_model_no_back():
 
 
 def test_create_anki_notes_from_txt(global_data, create_test_data):
-    """TESTCASE1: Create anki notes from a given txt file."""
+    """TESTCASE3: Create anki notes from a given txt file."""
+    logger.info("TESTCASE3")
+    logger.info(global_data["dir_path"] / global_data["test_file_name"])
+
     anki_notes = AnkiNotes.from_txt(
         data_fname=global_data["dir_path"] / global_data["test_file_name"],
     ).anki_notes
+
     assert len(anki_notes) == 2
     assert anki_notes[0].front == "죄송합니다"
     assert anki_notes[1].front == "이거 얼마예요"
@@ -44,7 +52,8 @@ def test_create_anki_notes_from_txt(global_data, create_test_data):
 
 
 def test_create_anki_notes_from_input(global_data):
-    """TESTCASE2: Create anki notes from a single input"""
+    """TESTCASE4: Create anki notes from a single input"""
+
     anki_notes = AnkiNotes.from_input_word(
         input_str="죄송합니다",
         deck_name=global_data["deck_name"],
