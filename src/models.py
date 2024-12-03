@@ -89,19 +89,33 @@ class AnkiNotes(BaseModel):
         Returns:
             _type_: _description_
         """
-        # Translate the word if the "back" field is not specified.
+        # Create the Anki note model
         if translated_word is None:
+            # If the translated word is not provided
+            # Validate the language of the word in the same time
+            anki_note = AnkiNoteModel(
+                deckName=deck_name,
+                modelName=model_name,
+                front=input_str,
+            )
+
+            # Create the translation of the word
             translator = Translator()
-            translation = translator.translate(input_str, src="ko", dest="ja")
+            translation = translator.translate(anki_note.front, src="ko", dest="ja")
             translated_word = translation.text
 
-        # Create the Anki note model
-        anki_note = AnkiNoteModel(
-            deckName=deck_name,
-            modelName=model_name,
-            front=input_str,
-            back=translated_word,
-        )
+            # Fill the translated word into the anki note
+            anki_note.back = translated_word
+
+        else:
+            # If the translated word is provided
+            anki_note = AnkiNoteModel(
+                deckName=deck_name,
+                modelName=model_name,
+                front=input_str,
+                back=translated_word,
+            )
+
         anki_notes_list = [anki_note]
         return cls(anki_notes=anki_notes_list)
 
