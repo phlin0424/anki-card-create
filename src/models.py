@@ -64,7 +64,7 @@ class AnkiSendMediaResponse(BaseModel):
 
 
 class AnkiNotes(BaseModel):
-    """A schema for the input of CardCreator"""
+    """A schema for the input of Kanki command line."""
 
     # A List for the created Anki notes.
     anki_notes: List[AnkiNoteModel]
@@ -125,21 +125,32 @@ class AnkiNotes(BaseModel):
             AnkiNotes: _description_
         """
 
+        # Read the vocabularies from a given text file
         with open(data_fname, "r") as f:
             voc_list = f.read().split("\n")
 
+        # Create a translator for translating the word
         translator = Translator()
 
+        # Create anki notes one by one
         anki_notes_list = []
         for word in voc_list:
-            translation = translator.translate(word, src="ko", dest="ja")
-            translated_word = translation.text
+            # Validate the read word first.
+            # It the word is not korean, raising errors
             anki_note = AnkiNoteModel(
                 deckName=deck_name,
                 modelName=model_name,
                 front=word,
-                back=translated_word,
             )
+
+            # Translate the word into japanese
+            translation = translator.translate(word, src="ko", dest="ja")
+            translated_word = translation.text
+
+            # Input the translated word into the anki note
+            anki_note.back = translated_word
+
+            # Append the anki note into a list
             anki_notes_list.append(anki_note)
 
         return cls(anki_notes=anki_notes_list)
