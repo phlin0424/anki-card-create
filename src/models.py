@@ -155,7 +155,9 @@ class AnkiNotes(BaseModel):
                 voc_list.append(split_row[0])
                 translated_list.append(None)
             else:
-                raise ValueError(f"Format of input file is not available at line {n+1}")
+                raise ValueError(
+                    f"Format of input file is not available at line {n+1}: {row}"
+                )
 
         # Create a translator for translating the word
         translator = Translator()
