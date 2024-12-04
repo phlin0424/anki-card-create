@@ -141,14 +141,28 @@ class AnkiNotes(BaseModel):
 
         # Read the vocabularies from a given text file
         with open(data_fname, "r") as f:
-            voc_list = f.read().split("\n")
+            rows = f.read().split("\n")
+
+        # Allowing reading translated words if being given
+        voc_list = []
+        translated_list = []
+        for n, row in enumerate(rows):
+            split_row = row.split(",")
+            if len(split_row) == 2:
+                voc_list.append(split_row[0])
+                translated_list.append(split_row[1])
+            elif len(split_row) == 1:
+                voc_list.append(split_row[0])
+                translated_list.append(None)
+            else:
+                raise ValueError(f"Format of input file is not available at line {n+1}")
 
         # Create a translator for translating the word
         translator = Translator()
 
         # Create anki notes one by one
         anki_notes_list = []
-        for word in voc_list:
+        for word, translated in zip(voc_list, translated_list):
             # Validate the read word first.
             # It the word is not korean, raising errors
             anki_note = AnkiNoteModel(
@@ -157,12 +171,13 @@ class AnkiNotes(BaseModel):
                 front=word,
             )
 
-            # Translate the word into japanese
-            translation = translator.translate(word, src="ko", dest="ja")
-            translated_word = translation.text
+            # Create the back side (translation) of the Ankinote
+            if not translated:
+                # Translate the word into japanese if translated word is not provided
+                translation = translator.translate(word, src="ko", dest="ja")
+                translated = translation.text
 
-            # Input the translated word into the anki note
-            anki_note.back = translated_word
+            anki_note.back = translated
 
             # Append the anki note into a list
             anki_notes_list.append(anki_note)
