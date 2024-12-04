@@ -47,22 +47,6 @@ class AnkiNoteModel(BaseModel):
         return self
 
 
-class AnkiNoteResponse(AnkiNoteModel):
-    status_code: int
-    result: None | int
-    error: None | str
-    audio: Optional[None | str]
-    model_config = ConfigDict(from_attributes=True)
-
-
-class AnkiSendMediaResponse(BaseModel):
-    audio_path: str
-    audio_file_name: str
-    status_code: int
-    result: None | str = None
-    error: None | str = None
-
-
 class AnkiNotes(BaseModel):
     """A schema for the input of Kanki command line."""
 
@@ -185,3 +169,23 @@ class AnkiNotes(BaseModel):
             anki_notes_list.append(anki_note)
 
         return cls(anki_notes=anki_notes_list)
+
+
+class AnkiNoteResponse(AnkiNoteModel):
+    """Response model for sending the created notes to the Anki DB."""
+
+    status_code: int
+    result: None | int
+    error: None | str
+    audio: Optional[None | str]
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnkiSendMediaResponse(BaseModel):
+    """Response after sending the created mp3 file to Anki collection folder"""
+
+    audio_path: str
+    audio_file_name: str
+    status_code: int
+    result: None | str = None
+    error: None | str = None
