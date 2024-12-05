@@ -5,6 +5,16 @@ from config import settings
 from googletrans import Translator
 from langdetect import detect
 from pydantic import BaseModel, ConfigDict, model_validator
+from enum import Enum
+
+
+class InputLang(str, Enum):
+    ko = "ko"
+
+
+class TranslatedLang(str, Enum):
+    en = "en"
+    ja = "ja"
 
 
 class AnkiNoteModel(BaseModel):
@@ -27,7 +37,8 @@ class AnkiNoteModel(BaseModel):
     sentence: Optional[str] = None
     translated_sentence: Optional[str] = None
     audio: Optional[str] = None
-    frontLang: str = "ko"  # Default expected language for the 'front' field
+    frontLang: InputLang = "ko"  # Default expected language for the 'front' field
+    backLang: TranslatedLang = "ja"
 
     @model_validator(mode="after")
     def check_languages(self):
@@ -189,3 +200,11 @@ class AnkiSendMediaResponse(BaseModel):
     status_code: int
     result: None | str = None
     error: None | str = None
+
+
+class TranslatorModel(BaseModel):
+    """A data model to create the translator module."""
+
+    source: InputLang = "ko"
+    target: TranslatedLang = "ja"
+    ai: bool = False
