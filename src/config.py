@@ -2,6 +2,7 @@ from pathlib import Path
 
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
+from models import InputLang, TranslatedLang
 
 DIR_PATH = Path(__file__).resolve().parent.parent
 API_URL = "http://127.0.0.1:8765"
@@ -30,6 +31,10 @@ class Config(BaseSettings):
         default="Basic (裏表反転カード付き)+sentense",
         description="The model name of the card being sent to Anki.",
     )
+
+    ai: bool
+    lang: InputLang = "ko"
+    translate_lang: TranslatedLang = "ja"
     model_config = ConfigDict(protected_namespaces=("settings_",))
 
 
