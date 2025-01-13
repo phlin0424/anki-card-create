@@ -1,5 +1,14 @@
 from deep_translator import GoogleTranslator
-from models import TranslatorModel
+from schemas import InputLang, TranslatedLang
+from pydantic import BaseModel
+
+
+class TranslatorModel(BaseModel):
+    """A data model to create the translator module."""
+
+    source: InputLang = "ko"
+    target: TranslatedLang = "ja"
+    ai: bool = False
 
 
 class TranslationTool:

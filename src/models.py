@@ -2,19 +2,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from config import settings
-from googletrans import Translator
 from langdetect import detect
 from pydantic import BaseModel, ConfigDict, model_validator
-from enum import Enum
-
-
-class InputLang(str, Enum):
-    ko = "ko"
-
-
-class TranslatedLang(str, Enum):
-    en = "en"
-    ja = "ja"
+from translation import TranslationTool, TranslatorModel
+from schemas import InputLang, TranslatedLang
 
 
 class AnkiNoteModel(BaseModel):
@@ -37,8 +28,8 @@ class AnkiNoteModel(BaseModel):
     sentence: Optional[str] = None
     translated_sentence: Optional[str] = None
     audio: Optional[str] = None
-    frontLang: InputLang = "ko"  # Default expected language for the 'front' field
-    backLang: TranslatedLang = "ja"
+    frontLang: InputLang = settings.using_lang
+    backLang: TranslatedLang = settings.translate_lang
 
     @model_validator(mode="after")
     def check_languages(self):
@@ -94,10 +85,16 @@ class AnkiNotes(BaseModel):
                 front=input_str,
             )
 
-            # Create the translation of the word
-            translator = Translator()
-            translation = translator.translate(anki_note.front, src="ko", dest="ja")
-            translated_word = translation.text
+            # Create a translator
+            translator_settings = TranslatorModel(
+                source=settings.using_lang,
+                target=settings.translate_lang,
+                ai=settings.ai,
+            )
+            translator = TranslationTool(translator_settings)
+
+            # Execute translation
+            translated_word = translator.translate(anki_note.front)
 
             # Fill the translated word into the anki note
             anki_note.back = translated_word
@@ -155,7 +152,10 @@ class AnkiNotes(BaseModel):
                 )
 
         # Create a translator for translating the word
-        translator = Translator()
+        translator_settings = TranslatorModel(
+            source=settings.using_lang, target=settings.translate_lang, ai=settings.ai
+        )
+        translator = TranslationTool(translator_settings)
 
         # Create anki notes one by one
         anki_notes_list = []
@@ -171,8 +171,7 @@ class AnkiNotes(BaseModel):
             # Create the back side (translation) of the Ankinote
             if not translated:
                 # Translate the word into japanese if translated word is not provided
-                translation = translator.translate(word, src="ko", dest="ja")
-                translated = translation.text
+                translated = translator.translate(word)
 
             anki_note.back = translated
 
@@ -200,11 +199,3 @@ class AnkiSendMediaResponse(BaseModel):
     status_code: int
     result: None | str = None
     error: None | str = None
-
-
-class TranslatorModel(BaseModel):
-    """A data model to create the translator module."""
-
-    source: InputLang = "ko"
-    target: TranslatedLang = "ja"
-    ai: bool = False
