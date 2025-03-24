@@ -4,8 +4,8 @@ from typing import List, Optional
 from config import settings
 from langdetect import detect
 from pydantic import BaseModel, ConfigDict, model_validator
-from translation import TranslationTool, TranslatorModel
 from schemas import InputLang, TranslatedLang
+from translation import TranslationTool, TranslatorModel
 
 
 class AnkiNoteModel(BaseModel):

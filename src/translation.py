@@ -1,6 +1,6 @@
 from deep_translator import GoogleTranslator
-from schemas import InputLang, TranslatedLang
 from pydantic import BaseModel
+from schemas import InputLang, TranslatedLang
 
 
 class TranslatorModel(BaseModel):
@@ -24,7 +24,7 @@ class TranslationTool:
             )
             self.translator = translator
 
-    def translate(self, word: str) -> str:
+    def translate(self, word: str) -> str | None:
         if not self.ai:
             translation = self.translator.translate(word)
 
