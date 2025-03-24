@@ -17,6 +17,7 @@ pydantic = "^2.6.4"
 langdetect = "^1.0.9"
 navertts = "^0.3.1"
 pydantic-settings = "^2.3.4"
+deep-translator = "^1.11.4"
 
 
 [tool.poetry.group.dev.dependencies]

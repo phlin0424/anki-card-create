@@ -2,9 +2,10 @@ from pathlib import Path
 from typing import List, Optional
 
 from config import settings
-from googletrans import Translator
 from langdetect import detect
 from pydantic import BaseModel, ConfigDict, model_validator
+from schemas import InputLang, TranslatedLang
+from translation import TranslationTool, TranslatorModel
 
 
 class AnkiNoteModel(BaseModel):
@@ -27,7 +28,8 @@ class AnkiNoteModel(BaseModel):
     sentence: Optional[str] = None
     translated_sentence: Optional[str] = None
     audio: Optional[str] = None
-    frontLang: str = "ko"  # Default expected language for the 'front' field
+    frontLang: InputLang = settings.using_lang
+    backLang: TranslatedLang = settings.translate_lang
 
     @model_validator(mode="after")
     def check_languages(self):
@@ -47,24 +49,8 @@ class AnkiNoteModel(BaseModel):
         return self
 
 
-class AnkiNoteResponse(AnkiNoteModel):
-    status_code: int
-    result: None | int
-    error: None | str
-    audio: Optional[None | str]
-    model_config = ConfigDict(from_attributes=True)
-
-
-class AnkiSendMediaResponse(BaseModel):
-    audio_path: str
-    audio_file_name: str
-    status_code: int
-    result: None | str = None
-    error: None | str = None
-
-
 class AnkiNotes(BaseModel):
-    """A schema for the input of CardCreator"""
+    """A schema for the input of Kanki command line."""
 
     # A List for the created Anki notes.
     anki_notes: List[AnkiNoteModel]
@@ -89,19 +75,39 @@ class AnkiNotes(BaseModel):
         Returns:
             _type_: _description_
         """
-        # Translate the word if the "back" field is not specified.
-        if translated_word is None:
-            translator = Translator()
-            translation = translator.translate(input_str, src="ko", dest="ja")
-            translated_word = translation.text
-
         # Create the Anki note model
-        anki_note = AnkiNoteModel(
-            deckName=deck_name,
-            modelName=model_name,
-            front=input_str,
-            back=translated_word,
-        )
+        if translated_word is None:
+            # If the translated word is not provided
+            # Validate the language of the word in the same time
+            anki_note = AnkiNoteModel(
+                deckName=deck_name,
+                modelName=model_name,
+                front=input_str,
+            )
+
+            # Create a translator
+            translator_settings = TranslatorModel(
+                source=settings.using_lang,
+                target=settings.translate_lang,
+                ai=settings.ai,
+            )
+            translator = TranslationTool(translator_settings)
+
+            # Execute translation
+            translated_word = translator.translate(anki_note.front)
+
+            # Fill the translated word into the anki note
+            anki_note.back = translated_word
+
+        else:
+            # If the translated word is provided
+            anki_note = AnkiNoteModel(
+                deckName=deck_name,
+                modelName=model_name,
+                front=input_str,
+                back=translated_word,
+            )
+
         anki_notes_list = [anki_note]
         return cls(anki_notes=anki_notes_list)
 
@@ -125,21 +131,71 @@ class AnkiNotes(BaseModel):
             AnkiNotes: _description_
         """
 
+        # Read the vocabularies from a given text file
         with open(data_fname, "r") as f:
-            voc_list = f.read().split("\n")
+            rows = f.read().split("\n")
 
-        translator = Translator()
+        # Allowing reading translated words if being given
+        voc_list = []
+        translated_list = []
+        for n, row in enumerate(rows):
+            split_row = row.split(",")
+            if len(split_row) == 2:
+                voc_list.append(split_row[0])
+                translated_list.append(split_row[1])
+            elif len(split_row) == 1:
+                voc_list.append(split_row[0])
+                translated_list.append(None)
+            else:
+                raise ValueError(
+                    f"Format of input file is not available at line {n+1}: {row}"
+                )
 
+        # Create a translator for translating the word
+        translator_settings = TranslatorModel(
+            source=settings.using_lang, target=settings.translate_lang, ai=settings.ai
+        )
+        translator = TranslationTool(translator_settings)
+
+        # Create anki notes one by one
         anki_notes_list = []
-        for word in voc_list:
-            translation = translator.translate(word, src="ko", dest="ja")
-            translated_word = translation.text
+        for word, translated in zip(voc_list, translated_list):
+            # Validate the read word first.
+            # It the word is not korean, raising errors
             anki_note = AnkiNoteModel(
                 deckName=deck_name,
                 modelName=model_name,
                 front=word,
-                back=translated_word,
             )
+
+            # Create the back side (translation) of the Ankinote
+            if not translated:
+                # Translate the word into japanese if translated word is not provided
+                translated = translator.translate(word)
+
+            anki_note.back = translated
+
+            # Append the anki note into a list
             anki_notes_list.append(anki_note)
 
         return cls(anki_notes=anki_notes_list)
+
+
+class AnkiNoteResponse(AnkiNoteModel):
+    """Response model for sending the created notes to the Anki DB."""
+
+    status_code: int
+    result: None | int
+    error: None | str
+    audio: Optional[None | str]
+    model_config = ConfigDict(from_attributes=True)
+
+
+class AnkiSendMediaResponse(BaseModel):
+    """Response after sending the created mp3 file to Anki collection folder"""
+
+    audio_path: str
+    audio_file_name: str
+    status_code: int
+    result: None | str = None
+    error: None | str = None
