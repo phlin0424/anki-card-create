@@ -14,7 +14,7 @@ def anki2_path() -> Path:
     return Path(os.getenv("ANKI2_PATH"))
 
 
-def test_send_anki_note_not_audio(global_data, create_test_data):
+def test_send_anki_note_not_audio(global_data: dict[str, str | Path], create_test_data):
     """TESTCASE1: Send the created notes to the specified deck, without generating audios"""
     anki_notes = AnkiNotes.from_txt(
         data_fname=global_data["dir_path"] / global_data["test_file_name"],
@@ -43,8 +43,8 @@ def test_send_audio(global_data, create_test_audio, anki2_path):
     assert response.error is None
     assert response.audio_file_name == global_data["audio_name"]
     # remove the audio file after testing
-    mp3_path = anki2_path / response.audio_file_name
-    os.remove(mp3_path.__str__())
+    # mp3_path = anki2_path / response.audio_file_name
+    # os.remove(mp3_path.__str__())
 
 
 def test_send_anki_note_with_audio(global_data, anki2_path):
