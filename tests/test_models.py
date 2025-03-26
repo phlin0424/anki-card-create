@@ -1,8 +1,8 @@
 import logging
 
+from config import settings
 from models import AnkiNoteModel, AnkiNotes
 from translation import TranslationTool, TranslatorModel
-from config import settings
 
 # TODO: will remove after applying DI
 translator_settings = TranslatorModel(
@@ -33,7 +33,6 @@ def test_anki_note_model():
 
 def test_anki_note_model_no_back():
     """TESTCASE2: Create a note by manually input the text without back"""
-
     note = AnkiNoteModel(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
@@ -64,7 +63,6 @@ def test_create_anki_notes_from_txt(global_data, create_test_data):
 
 def test_create_anki_notes_from_input(global_data):
     """TESTCASE4: Create anki notes from a single input"""
-
     anki_notes = AnkiNotes.from_input_word(
         input_str="죄송합니다",
         deck_name=global_data["deck_name"],

@@ -1,10 +1,15 @@
 import argparse
+import logging
 
-from card_creator import AnkiNotes, CardCreator
-from config import settings
+from anki_card_create.card_creator import CardCreator
+from anki_card_create.config import settings
+from anki_card_create.models import KankiInput
+
+logger = logging.getLogger(__name__)
 
 
-def get_args_parser(known=False):
+def get_args_parser(known=False) -> argparse.Namespace:
+    """Get the arguments parser for the command line interface."""
     parser = argparse.ArgumentParser("Create Anki flash cards.")
     group = parser.add_mutually_exclusive_group(required=True)
 
@@ -25,6 +30,7 @@ def get_args_parser(known=False):
         default=settings.deck_name,
         help="Name of the Anki deck to which the cards will be added.",
     )
+
     parser.add_argument(
         "-m",
         "--model_name",
@@ -32,30 +38,31 @@ def get_args_parser(known=False):
         help="Name of the Anki card model to which the cards will be added.",
     )
 
-    opt = parser.parse_known_args()[0] if known else parser.parse_args()
-    return opt
+    return parser.parse_known_args()[0] if known else parser.parse_args()
 
 
-def main():
+def main() -> None:
+    """Create Anki flash cards from the input word or file."""
     args = get_args_parser(known=True)
+    logger.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
 
-    print(f"deck name: {args.deck_name}; card model: {args.model_name}")
-
+    # Create notes according to the input word
     if args.file:
-        anki_notes = AnkiNotes.from_txt(
+        kanki_input = KankiInput.from_txt(
             data_fname=args.file,
             deck_name=args.deck_name,
             model_name=args.model_name,
         ).anki_notes
     else:
-        anki_notes = AnkiNotes.from_input_word(
+        kanki_input = KankiInput.from_input_word(
             input_str=args.word,
             deck_name=args.deck_name,
             model_name=args.model_name,
         ).anki_notes
 
-    card_creator = CardCreator(anki_notes)
-    response_list = card_creator.send_notes(audio=True)
+    # Send the notes to Anki with the audio
+    card_creator = CardCreator(kanki_input)
+    card_creator.send_notes(audio=True)
 
 
 if __name__ == "__main__":

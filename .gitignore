@@ -10,3 +10,4 @@ dist/
 __pycache__
 .DS_Store
 pytest.ini
+.vscode

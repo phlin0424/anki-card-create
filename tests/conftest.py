@@ -1,13 +1,12 @@
 import os
 from pathlib import Path
-from typing import Dict
 
 import pytest
 from navertts import NaverTTS
 
 
 @pytest.fixture(scope="session")
-def global_data() -> Dict[str, str]:
+def global_data() -> dict[str, Path | str | list[str]]:
     return {
         "dir_path": Path(__file__).resolve().parent,
         "test_word": "안녕하세요",
@@ -19,8 +18,9 @@ def global_data() -> Dict[str, str]:
     }
 
 
-@pytest.fixture(scope="function")
-def response_anki_note(global_data):
+@pytest.fixture
+def response_anki_note(global_data: dict[str, Path | str | list[str]]) -> dict[str, int | str | None]:
+    """A fixture to return the expected response from the Anki API."""
     # status_code: int
     # result: Union[None, int]
     # error: Union[None, str]
@@ -32,7 +32,7 @@ def response_anki_note(global_data):
     # translated_sentence: Optional[str] = None
     # audio: Optional[str] = None
     # frontLang: str = "ko"
-    response_content = {
+    return {
         "status_code": 200,
         "result": 1496198395707,
         "error": None,
@@ -40,13 +40,12 @@ def response_anki_note(global_data):
         "front": global_data["test_word"],
         "modelName": global_data["model_name"],
     }
-    return response_content
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture
 def setup_anki_mock(mocker, response_anki_note):
     # Mock requests.post to return a mock response object with .json() method
-    mock_anki_invoke = mocker.patch("card_creator.anki_invoke")
+    mock_anki_invoke = mocker.patch("anki_card_create.card_creator.card_creator.CardCreator._anki_invoke")
 
     # Define the side effect function to handle different actions
     def anki_invoke_side_effect(action, params):
@@ -56,24 +55,22 @@ def setup_anki_mock(mocker, response_anki_note):
                 "error": None,
             }
             return mocker.Mock(status_code=200, json=lambda: expected_response)
-        elif action == "storeMediaFile":
+        if action == "storeMediaFile":
             expected_response = {
                 "result": "test.mp3",
                 "error": None,
             }
             return mocker.Mock(status_code=200, json=lambda: expected_response)
-        return mocker.Mock(
-            status_code=400, json=lambda: {"error": "not expected actions"}
-        )
+        return mocker.Mock(status_code=400, json=lambda: {"error": "not expected actions"})
 
     mock_anki_invoke.side_effect = anki_invoke_side_effect
 
-    yield mocker
+    return mocker
 
 
 @pytest.fixture(scope="module")
 def create_test_data(global_data) -> None:
-    """create the test data at the file path being specified"""
+    """Create the test data at the file path being specified"""
     input_word = global_data["test_word_in_txt"]
     file_path = global_data["dir_path"] / global_data["test_file_name"]
     with open(file_path, "w") as f:
