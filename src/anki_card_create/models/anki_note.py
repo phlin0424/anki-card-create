@@ -1,7 +1,7 @@
 from langdetect import detect
 from pydantic import BaseModel, model_validator
 
-from anki_card_create.config import settings, InputLang, TranslatedLang
+from anki_card_create.config import InputLang, TranslatedLang, settings
 
 
 class AnkiNote(BaseModel):

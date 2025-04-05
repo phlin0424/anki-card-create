@@ -3,8 +3,8 @@ import sys
 from argparse import Namespace
 
 import pytest
-from config import settings
-from main import get_args_parser
+from anki_card_create.config import settings
+from anki_card_create.cli.main import get_args_parser
 
 logger = logging.getLogger(__name__)
 

@@ -1,9 +1,10 @@
 import argparse
 import logging
+from pathlib import Path
 
 from anki_card_create.card_creator import CardCreator
 from anki_card_create.config import settings
-from anki_card_create.models import KankiInput
+from anki_card_create.models.kanki_input import KankiInput
 
 logger = logging.getLogger(__name__)
 
@@ -49,20 +50,20 @@ def main() -> None:
     # Create notes according to the input word
     if args.file:
         kanki_input = KankiInput.from_txt(
-            data_fname=args.file,
+            data_fname=Path() / args.file,
             deck_name=args.deck_name,
             model_name=args.model_name,
-        ).anki_notes
+        )
     else:
         kanki_input = KankiInput.from_input_word(
             input_str=args.word,
             deck_name=args.deck_name,
             model_name=args.model_name,
-        ).anki_notes
+        )
 
     # Send the notes to Anki with the audio
-    card_creator = CardCreator(kanki_input)
-    card_creator.send_notes(audio=True)
+    card_creator = CardCreator()
+    card_creator.send_notes(kanki_input=kanki_input, audio=True)
 
 
 if __name__ == "__main__":

@@ -7,6 +7,7 @@ from requests import Response
 
 from anki_card_create.config.settings import settings
 from anki_card_create.exceptions import MediaAdditionError
+from anki_card_create.models.kanki_input import KankiInput
 from anki_card_create.models.anki_note import AnkiNote
 from anki_card_create.models.response import AnkiNoteResponse, AnkiSendMediaResponse
 from anki_card_create.services.utils import (
@@ -18,13 +19,14 @@ logging.basicConfig(level=logging.INFO)
 
 
 class CardCreator:
-    def __init__(self, anki_notes: list[AnkiNote]):
-        self._anki_notes = anki_notes
+    def __init__(self) -> None:
+        pass
 
-    def send_notes(self, audio: bool = True) -> list[AnkiNoteResponse]:
+    def send_notes(self, kanki_input: KankiInput, audio: bool = True) -> list[AnkiNoteResponse]:
         """Send the Anki notes to the Anki collection.
 
         Args:
+            kanki_input (KankiInput): An input of the Anki notes.
             audio (bool, optional): If True, create an audio file from the front side of the Anki note. Defaults to True.
 
         Raises:
@@ -35,8 +37,9 @@ class CardCreator:
 
         """
         response_json_list = []
-        # Create mp3 for a given anki-note and send it to Anki's media folder if
-        for anki_note in self._anki_notes:
+        # Create mp3 for a given anki-note and send it to Anki's media folder if audio is True
+        anki_notes = kanki_input.anki_notes
+        for anki_note in anki_notes:
             if audio:
                 # Create the mp3 file from the front side of the anki-note
                 audio_path = create_audio(anki_note.front)
@@ -146,7 +149,3 @@ class CardCreator:
         )
 
         return AnkiNoteResponse(**anki_note_dict)
-
-    @property
-    def anki_notes(self):
-        return self._anki_notes

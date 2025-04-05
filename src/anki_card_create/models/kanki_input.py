@@ -1,19 +1,21 @@
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
+import logging
 
 from anki_card_create.config import settings
 from anki_card_create.models.anki_note import AnkiNote
 from anki_card_create.models.translator_input import TranslatorInput
 from anki_card_create.services.translators import TranslationTool
 
+logging.basicConfig(level=logging.INFO)
+
 
 class KankiInput(BaseModel):
     """A schema for the input of Kanki command line to create Anki notes."""
 
+    # A list of Anki notes to be created
     anki_notes: list[AnkiNote]
-
-    # A List for the created Anki notes.
     model_config = ConfigDict(protected_namespaces=("settings_",))
 
     @classmethod
@@ -108,22 +110,28 @@ class KankiInput(BaseModel):
         # Create anki notes one by one
         anki_notes_list = []
         for word, translated in zip(voc_list, translated_list, strict=False):
-            # Validate the read word first.
-            # It the word is not korean, raising errors
-            anki_note = AnkiNote(
-                deckName=deck_name,
-                modelName=model_name,
-                front=word,
-            )
+            # If the word is not empty, create an Anki note
+            try:
+                # Validate the read word first.
+                # It the word is not korean, raising errors
+                anki_note = AnkiNote(
+                    deckName=deck_name,
+                    modelName=model_name,
+                    front=word,
+                )
 
-            # Create the back side (translation) of the Ankinote
-            if not translated:
-                # Translate the word into japanese if translated word is not provided
-                translated = translator.translate(word)
+                # Create the back side (translation) of the Ankinote
+                if not translated:
+                    # Translate the word into japanese if translated word is not provided
+                    translated = translator.translate(word)
 
-            anki_note.back = translated
+                anki_note.back = translated
 
-            # Append the anki note into a list
-            anki_notes_list.append(anki_note)
+                # Append the anki note into a list
+                anki_notes_list.append(anki_note)
+            except Exception as e:
+                # If the word is not valid, skip it
+                logging.warning(f"Error at line {n + 1}: {word} - {e}; skipping...")
+                continue
 
         return cls(anki_notes=anki_notes_list)

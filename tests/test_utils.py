@@ -1,6 +1,7 @@
-from translation import TranslationTool, TranslatorModel
+from anki_card_create.services.translators import TranslationTool
+from anki_card_create.models.translator_input import TranslatorInput
 
 
 def test_translation_tool():
-    tool = TranslationTool(TranslatorModel(source="ko", target="ja", ai=False))
+    tool = TranslationTool(TranslatorInput(source="ko", target="ja", ai=False))
     assert tool.translate("안녕") == "こんにちは"

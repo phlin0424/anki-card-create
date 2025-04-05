@@ -1,3 +1,3 @@
-from .settings import settings, InputLang, TranslatedLang
+from .settings import InputLang, TranslatedLang, settings
 
-__all__ = ["settings", "InputLang", "TranslatedLang"]
+__all__ = ["InputLang", "TranslatedLang", "settings"]

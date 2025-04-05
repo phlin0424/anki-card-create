@@ -1,11 +1,15 @@
 import logging
 
-from config import settings
-from models import AnkiNoteModel, AnkiNotes
-from translation import TranslationTool, TranslatorModel
+from anki_card_create.config import settings
+from anki_card_create.services.translators import TranslationTool
+from anki_card_create.models.translator_input import TranslatorInput
+
+from anki_card_create.models.anki_note import AnkiNote
+from anki_card_create.models.kanki_input import KankiInput
+
 
 # TODO: will remove after applying DI
-translator_settings = TranslatorModel(
+translator_settings = TranslatorInput(
     source=settings.using_lang,
     target=settings.translate_lang,
     ai=settings.ai,
@@ -17,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 def test_anki_note_model():
     """TESTCASE1: Create a note by manually input the text"""
-    note = AnkiNoteModel(
+    note = AnkiNote(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
         front="안녕하세요",
@@ -33,7 +37,7 @@ def test_anki_note_model():
 
 def test_anki_note_model_no_back():
     """TESTCASE2: Create a note by manually input the text without back"""
-    note = AnkiNoteModel(
+    note = AnkiNote(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
         front="안녕하세요",
@@ -50,7 +54,7 @@ def test_create_anki_notes_from_txt(global_data, create_test_data):
     logger.info("TESTCASE3")
     logger.info(global_data["dir_path"] / global_data["test_file_name"])
 
-    anki_notes = AnkiNotes.from_txt(
+    anki_notes = KankiInput.from_txt(
         data_fname=global_data["dir_path"] / global_data["test_file_name"],
     ).anki_notes
 
@@ -63,7 +67,7 @@ def test_create_anki_notes_from_txt(global_data, create_test_data):
 
 def test_create_anki_notes_from_input(global_data):
     """TESTCASE4: Create anki notes from a single input"""
-    anki_notes = AnkiNotes.from_input_word(
+    anki_notes = KankiInput.from_input_word(
         input_str="죄송합니다",
         deck_name=global_data["deck_name"],
         model_name=global_data["model_name"],

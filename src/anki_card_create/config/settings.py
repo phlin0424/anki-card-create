@@ -1,8 +1,8 @@
+from enum import Enum
 from pathlib import Path
 
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
-from enum import Enum
 
 DIR_PATH = Path(__file__).resolve().parent.parent
 API_URL = "http://127.0.0.1:8765"
