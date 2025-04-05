@@ -5,7 +5,6 @@ from pathlib import Path
 import pytest
 
 from anki_card_create.card_creator import CardCreator
-from anki_card_create.models import kanki_input
 from anki_card_create.models.kanki_input import KankiInput
 
 logger = logging.getLogger(__name__)

@@ -1,12 +1,10 @@
 import logging
 
 from anki_card_create.config import settings
-from anki_card_create.services.translators import TranslationTool
-from anki_card_create.models.translator_input import TranslatorInput
-
 from anki_card_create.models.anki_note import AnkiNote
 from anki_card_create.models.kanki_input import KankiInput
-
+from anki_card_create.models.translator_input import TranslatorInput
+from anki_card_create.services.translators import TranslationTool
 
 # TODO: will remove after applying DI
 translator_settings = TranslatorInput(

@@ -1,5 +1,5 @@
-from anki_card_create.services.translators import TranslationTool
 from anki_card_create.models.translator_input import TranslatorInput
+from anki_card_create.services.translators import TranslationTool
 
 
 def test_translation_tool():
