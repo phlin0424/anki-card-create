@@ -1,10 +1,10 @@
 import uuid
 from pathlib import Path
-from typing import Union
 
-from config import settings
-from models import AnkiNoteResponse, AnkiSendMediaResponse
 from navertts import NaverTTS
+
+from anki_card_create.config import settings
+from anki_card_create.models.response import AnkiNoteResponse
 
 
 def create_message(card_create_response: AnkiNoteResponse) -> str:
@@ -15,6 +15,7 @@ def create_message(card_create_response: AnkiNoteResponse) -> str:
 
     Returns:
         str: The message.
+
     """
     # Check if the deck exists and the note was added successfully
     if card_create_response.status_code == 200:
@@ -23,17 +24,12 @@ def create_message(card_create_response: AnkiNoteResponse) -> str:
             # Check if the error message indicates that the deck does not exist
             if "deck not found" in card_create_response.error:
                 return word_being_sent + ":Error: Deck does not exist"
-            else:
-                return word_being_sent + f": Error: {card_create_response.error}"
-        else:
-            return word_being_sent + ": Note added successfully"
-    else:
-        return word_being_sent + ": Error adding note to deck"
+            return word_being_sent + f": Error: {card_create_response.error}"
+        return word_being_sent + ": Note added successfully"
+    return word_being_sent + ": Error adding note to deck"
 
 
-def create_audio(
-    text: str, path: Union[Path, str] = settings.mp3_path
-) -> Union[Path, str]:
+def create_audio(text: str, path: Path | str = settings.mp3_path) -> Path:
     """Create an audio file (.mp3) for the input korean word. Based on Naver TTS API.
 
     Args:
@@ -43,6 +39,7 @@ def create_audio(
     Returns:
         Union[Path, str]: The path of the output audio file.
             For example: User/path/to/directory/naver_e9633695-8fce-4ea3-901a-489863a9214e.mp3
+
     """
     # texts = [note.front for note in self._anki_notes]
     if not isinstance(path, Path):
@@ -53,13 +50,3 @@ def create_audio(
     audio_filename = path / f"naver_{uuid.uuid4()}.mp3"
     tts.save(audio_filename)
     return audio_filename
-
-
-class MediaAdditionError(Exception):
-    """Exception raised when adding media fails."""
-
-    def __init__(self, response: AnkiSendMediaResponse, message="Failed to add media"):
-        self.status_code = response.status_code
-        message = response.error
-        self.message = f"{message}. Status code: {self.status_code}"
-        super().__init__(self.message)

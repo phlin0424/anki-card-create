@@ -1,12 +1,21 @@
+from enum import Enum
 from pathlib import Path
 
 from pydantic import ConfigDict, Field
 from pydantic_settings import BaseSettings
-from schemas import InputLang, TranslatedLang
 
 DIR_PATH = Path(__file__).resolve().parent.parent
 API_URL = "http://127.0.0.1:8765"
 MP3_PATH = DIR_PATH / "data"
+
+
+class InputLang(str, Enum):
+    ko = "ko"
+
+
+class TranslatedLang(str, Enum):
+    en = "en"
+    ja = "ja"
 
 
 class Config(BaseSettings):
