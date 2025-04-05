@@ -3,7 +3,7 @@ requires-python = ">=3.11"
 
 [[package]]
 name = "anki-card-create"
-version = "0.1.9"
+version = "0.1.10"
 source = { editable = "." }
 dependencies = [
     { name = "deep-translator" },
