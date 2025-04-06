@@ -6,40 +6,33 @@ on:
       - main 
 
 jobs:
-  build:
+  uv-example:
+    name: python
     runs-on: ubuntu-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+    - uses: actions/checkout@v4
+
+    - name: Install uv
+      uses: astral-sh/setup-uv@v5
 
     - name: Set up Python
-      uses: actions/setup-python@v2
+      uses: actions/setup-python@v5
       with:
-        python-version: '3.11' 
+        python-version-file: "pyproject.toml"
+  
+    - name: Install the project
+      run: uv sync --all-extras --dev
 
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="$HOME/.local/bin:$PATH"
-    
-    - name: Install dependencies
-      run: |
-        poetry install
-      env:
-        POETRY_VIRTUALENVS_CREATE: false
-
-    - name: Test Package
-      run: | 
-        poetry run pytest --ignore=tests/test_card_creator.py
+    - name: Run tests
+      run: uv run pytest tests
 
     - name: Build package
       run: |
-        poetry build
+        uv build
 
     - name: Publish package to PyPI
       env:
         PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
       run: |
-        poetry config pypi-token.pypi ${PYPI_TOKEN}
-        poetry publish
+        uv publish --token ${PYPI_TOKEN} 
