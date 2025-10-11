@@ -60,7 +60,7 @@ runs:
       if: ${{ inputs.publish == 'true' }}
       id: bump
       run: |
-        uv version --bump minor
+        uv version --bump patch
         # capture new version; uv prints "<name> <version>"
         NEW_VERSION=$(uv version --output-format text | awk '{print $NF}')
         echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
