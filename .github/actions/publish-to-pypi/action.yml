@@ -49,6 +49,36 @@ runs:
       shell: bash
       run: uv run pytest ${{ inputs.pytest-args }}
 
+    - name: Set up Git identity
+      if: ${{ inputs.publish == 'true' }}
+      run: |
+        git config user.name "github-actions[bot]"
+        git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+      shell: bash
+
+    - name: Bump version (minor) with uv
+      if: ${{ inputs.publish == 'true' }}
+      id: bump
+      run: |
+        uv version --bump minor
+        # capture new version; uv prints "<name> <version>"
+        NEW_VERSION=$(uv version --output-format text | awk '{print $NF}')
+        echo "new_version=$NEW_VERSION" >> "$GITHUB_OUTPUT"
+      shell: bash
+
+    - name: Commit version bump
+      if: ${{ inputs.publish == 'true' }}
+      run: |
+        if ! git diff --quiet; then
+          git add pyproject.toml
+          git commit -m "chore: bump version to v${{ steps.bump.outputs.new_version }}"
+          git tag -a "v${{ steps.bump.outputs.new_version }}" -m "Release v${{ steps.bump.outputs.new_version }}"
+          git push --follow-tags
+        else
+          echo "No changes to commit."
+        fi
+      shell: bash
+
     - name: Build package
       if: ${{ inputs.publish == 'true' }}
       shell: bash

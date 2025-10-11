@@ -7,8 +7,8 @@ from requests import Response
 
 from anki_card_create.config.settings import settings
 from anki_card_create.exceptions import MediaAdditionError
-from anki_card_create.models.kanki_input import KankiInput
 from anki_card_create.models.anki_note import AnkiNote
+from anki_card_create.models.kanki_input import KankiInput
 from anki_card_create.models.response import AnkiNoteResponse, AnkiSendMediaResponse
 from anki_card_create.services.utils import (
     create_audio,

@@ -1,7 +1,7 @@
+import logging
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict
-import logging
 
 from anki_card_create.config import settings
 from anki_card_create.models.anki_note import AnkiNote
