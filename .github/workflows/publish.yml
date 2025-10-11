@@ -2,44 +2,23 @@ name: Publish Python Package
 
 on:
   push:
-    branches:
-      - main 
+    branches: [main]
+    # (recommended) publish only on tags:
+    # tags: [ "v*" ]
 
 jobs:
-  build:
+  publish:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
-
-    - name: Set up Python
-      uses: actions/setup-python@v2
-      with:
-        python-version: '3.11' 
-
-    - name: Install Poetry
-      run: |
-        curl -sSL https://install.python-poetry.org | python3 -
-        export PATH="$HOME/.local/bin:$PATH"
-    
-    - name: Install dependencies
-      run: |
-        poetry install
-      env:
-        POETRY_VIRTUALENVS_CREATE: false
-
-    - name: Test Package
-      run: | 
-        poetry run pytest --ignore=tests/test_card_creator.py
-
-    - name: Build package
-      run: |
-        poetry build
-
-    - name: Publish package to PyPI
-      env:
-        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      run: |
-        poetry config pypi-token.pypi ${PYPI_TOKEN}
-        poetry publish
+      - name: Build & Publish with Poetry
+        uses: ./.github/actions/poetry-publish
+        with:
+          python-version: "3.11"
+          pypi-token: ${{ secrets.PYPI_TOKEN }}
+          run-tests: "true"
+          pytest-args: "--ignore=tests/test_card_creator.py"
+          publish: "true"
+          no-venv: "true"

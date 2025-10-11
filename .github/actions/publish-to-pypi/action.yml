@@ -1,0 +1,94 @@
+name: "Poetry Build & Publish"
+description: "Build, test, and publish a Python package to PyPI with Poetry"
+author: "lin-pei-hsuan"
+
+inputs:
+  python-version:
+    description: "Python version to use"
+    required: false
+    default: "3.11"
+  poetry-version:
+    description: "Poetry version (empty = installer latest)"
+    required: false
+    default: ""
+  pypi-token:
+    description: "PyPI token (pass via secrets)"
+    required: false
+  run-tests:
+    description: "Run tests before build"
+    required: false
+    default: "true"
+  pytest-args:
+    description: "Extra pytest args (e.g. --ignore=tests/test_card_creator.py)"
+    required: false
+    default: "--quiet"
+  build-args:
+    description: "Extra poetry build args"
+    required: false
+    default: ""
+  publish:
+    description: "Publish to PyPI"
+    required: false
+    default: "true"
+  no-venv:
+    description: "Set POETRY_VIRTUALENVS_CREATE=false"
+    required: false
+    default: "true"
+
+runs:
+  using: "composite"
+  steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: ${{ inputs.python-version }}
+        cache: "pip"
+
+    - name: Install Poetry
+      shell: bash
+      run: |
+        if [ -n "${{ inputs.poetry-version }}" ]; then
+          curl -sSL https://install.python-poetry.org | POETRY_VERSION="${{ inputs.poetry-version }}" python3 -
+        else
+          curl -sSL https://install.python-poetry.org | python3 -
+        fi
+        echo "$HOME/.local/bin" >> "$GITHUB_PATH"
+
+    - name: Configure Poetry (optional venv disable)
+      if: ${{ inputs.no-venv == 'true' }}
+      shell: bash
+      run: |
+        echo "POETRY_VIRTUALENVS_CREATE=false" >> $GITHUB_ENV
+
+    - name: Install dependencies
+      shell: bash
+      run: |
+        poetry --version
+        poetry install --no-interaction --no-ansi
+
+    - name: Run tests
+      if: ${{ inputs.run-tests == 'true' }}
+      shell: bash
+      run: |
+        poetry run pytest ${{ inputs.pytest-args }}
+
+    - name: Build package
+      shell: bash
+      run: |
+        poetry build ${{ inputs.build-args }}
+
+    - name: Publish to PyPI
+      if: ${{ inputs.publish == 'true' }}
+      env:
+        PYPI_TOKEN: ${{ inputs.pypi-token }}
+      shell: bash
+      run: |
+        if [ -z "$PYPI_TOKEN" ]; then
+          echo "No PyPI token provided; skipping publish." >&2
+          exit 1
+        fi
+        poetry config pypi-token.pypi "$PYPI_TOKEN"
+        poetry publish --no-interaction --no-ansi
