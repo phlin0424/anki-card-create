@@ -5,6 +5,7 @@ on:
   push:
     branches:
       - "feature/**" # run tests on feature branches
+      - "hotfix/**" # run tests on hotfix branches
     tags:
       - "v*" # allow tag-based publishes
   pull_request:
@@ -17,7 +18,8 @@ jobs:
     # Only run tests on feature/* pushes or manual dispatch (skip on PR-closed and tag pushes)
     if: >
       github.event_name == 'workflow_dispatch' ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/'))
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/hotfix/'))
     runs-on: ubuntu-latest
     permissions:
       contents: read
