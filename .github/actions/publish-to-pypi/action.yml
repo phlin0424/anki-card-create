@@ -45,6 +45,10 @@ runs:
       shell: bash
       run: uv sync --all-extras --dev
 
+    - name: Run tests
+      shell: bash
+      run: uv run pytest ${{ inputs.pytest-args }}
+
     - name: Build package
       if: ${{ inputs.publish == 'true' }}
       shell: bash
