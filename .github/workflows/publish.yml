@@ -1,38 +1,67 @@
-name: Publish Python Package
+name: Build, Test & Publish Python Package
 
 on:
+  workflow_dispatch:
   push:
     branches:
-      - main 
+      - "feature/**" # run tests on feature branches
+      - "hotfix/**" # run tests on hotfix branches
+    tags:
+      - "v*" # allow tag-based publishes
+  pull_request:
+    branches: [main]
+    types: [closed] # fire when a PR into main is closed (merged or not)
 
 jobs:
-  uv-example:
-    name: python
+  test:
+    name: "Test with uv"
+    # Only run tests on feature/* pushes or manual dispatch (skip on PR-closed and tag pushes)
+    if: >
+      github.event_name == 'workflow_dispatch' ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/feature/')) ||
+      (github.event_name == 'push' && startsWith(github.ref, 'refs/heads/hotfix/'))
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
 
     steps:
-    - uses: actions/checkout@v4
+      - name: Checkout repository
+        uses: actions/checkout@v4
 
-    - name: Install uv
-      uses: astral-sh/setup-uv@v5
+      - name: Test with uv
+        uses: ./.github/actions/publish-to-pypi
+        with:
+          python-version: "3.11"
+          pytest-args: "--ignore=tests/test_card_creator.py"
+          publish: "false"
 
-    - name: Set up Python
-      uses: actions/setup-python@v5
-      with:
-        python-version-file: "pyproject.toml"
-  
-    - name: Install the project
-      run: uv sync --all-extras --dev
+  publish:
+    name: "Publish Python Package to PyPI"
+    # Publish on: merged PR into main OR tag push OR manual dispatch
+    if: >
+      (github.event_name == 'pull_request' &&
+       github.event.action == 'closed' &&
+       github.event.pull_request.merged == true)
+      || (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/'))
+      || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    # prevent simultaneous publishes for the same repo/ref
+    concurrency:
+      group: pypi-publish-${{ github.ref }}
+      cancel-in-progress: false
 
-    - name: Run tests
-      run: uv run pytest tests --ignore=tests/test_card_creator.py
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # useful if your action looks at tags/history
 
-    - name: Build package
-      run: |
-        uv build
-
-    - name: Publish package to PyPI
-      env:
-        PYPI_TOKEN: ${{ secrets.PYPI_TOKEN }}
-      run: |
-        uv publish --token ${PYPI_TOKEN} 
+      - name: Build & Publish with uv
+        uses: ./.github/actions/publish-to-pypi
+        with:
+          python-version: "3.11"
+          pypi-token: ${{ secrets.PYPI_TOKEN }}
+          pytest-args: "--ignore=tests/test_card_creator.py"
+          publish: "true"

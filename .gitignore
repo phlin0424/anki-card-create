@@ -12,4 +12,4 @@ __pycache__
 pytest.ini
 .vscode
 src/anki_card_create/config/.env
-test_notebooks/
+.test_notebooks/
