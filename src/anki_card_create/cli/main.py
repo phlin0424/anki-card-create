@@ -19,6 +19,13 @@ def get_args_parser(known=False) -> argparse.Namespace:
         "--file",
         help="File containing text for Anki cards.",
     )
+
+    group.add_argument(
+        "-i",
+        "--image",
+        help="File containing image for Anki cards.",
+    )
+
     group.add_argument(
         "-w",
         "--word",
@@ -48,12 +55,23 @@ def main() -> None:
     logger.info(f"deck name: {args.deck_name}; card model: {args.model_name}")
 
     # Create notes according to the input word
+    # Case 1: from a text file
     if args.file:
         kanki_input = KankiInput.from_txt(
             data_fname=Path() / args.file,
             deck_name=args.deck_name,
             model_name=args.model_name,
         )
+
+    # Case 2: from an image file
+    elif args.image:
+        kanki_input = KankiInput.from_image(
+            input_img_path=Path() / args.image,
+            deck_name=args.deck_name,
+            model_name=args.model_name,
+        )
+
+    # Case 3: from a single word
     else:
         kanki_input = KankiInput.from_input_word(
             input_str=args.word,
