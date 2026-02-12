@@ -1,0 +1,37 @@
+name: Test Python Package
+
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - main
+    types: [opened, synchronize, reopened]
+  push:
+    branches:
+      - main
+      - "feature/**"
+
+jobs:
+  test:
+    name: "Test with uv"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      - name: Check out
+        uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5 # Upgraded to v5 for better caching
+        with:
+          enable-cache: true
+
+      - name: Set up Python
+        run: uv python install 3.13 # Pin to 3.13 to prevent the PyO3 3.14 error
+
+      - name: Install the project
+        run: uv sync --all-extras --dev
+
+      - name: Run tests
+        run: uv run pytest -v

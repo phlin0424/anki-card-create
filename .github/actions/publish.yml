@@ -1,5 +1,5 @@
-name: "uv Build & Publish"
-description: "Build, test, and publish a Python package to PyPI with uv"
+name: "Build and Publish"
+description: "Build and Publish to Pypi"
 author: "lin-pei-hsuan"
 
 inputs:
@@ -18,14 +18,12 @@ inputs:
     description: "Run tests before build"
     required: false
     default: "true"
-  pytest-args:
-    description: "Extra pytest args (e.g. --ignore=tests/test_card_creator.py)"
-    required: false
-    default: "--quiet"
   publish:
     description: "Publish to PyPI"
     required: false
     default: "true"
+
+
 
 runs:
   using: "composite"
@@ -47,7 +45,7 @@ runs:
 
     - name: Run tests
       shell: bash
-      run: uv run pytest ${{ inputs.pytest-args }}
+      run: uv run pytest -v
 
     - name: Set up Git identity
       if: ${{ inputs.publish == 'true' }}
