@@ -1,14 +1,20 @@
 import logging
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 
 from anki_card_create.config import settings
 from anki_card_create.models.anki_note import AnkiNote
 from anki_card_create.models.translator_input import TranslatorInput
+from anki_card_create.services.image_txt_extractor import ImageTxtExtractor
 from anki_card_create.services.translators import TranslationTool
 
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
+
+api_key = os.getenv("API_KEY")
 
 
 class KankiInput(BaseModel):
@@ -133,5 +139,45 @@ class KankiInput(BaseModel):
                 # If the word is not valid, skip it
                 logging.warning(f"Error at line {n + 1}: {word} - {e}; skipping...")
                 continue
+
+        return cls(anki_notes=anki_notes_list)
+
+    @classmethod
+    def from_image(
+        cls,
+        input_img_path: str,
+        deck_name: str = settings.deck_name,
+        model_name: str = settings.model_name,
+    ) -> "KankiInput":
+        """Model the kanki input based on the given image.
+
+        Args:
+            input_img_path (str): The path to the image file.
+            deck_name (str, optional): The deck name that the created note will be sent. Defaults to settings.deck_name.
+            model_name (str, optional): The model name that will be used to format the created note. Defaults to settings.model_name.
+
+        Returns:
+            KankiInput: _description_
+
+        """
+        # Extract text from image
+        extractor = ImageTxtExtractor(api_key=api_key)
+        extracted_txt: str | None = extractor.extract_text(img_path=input_img_path)
+
+        if not extracted_txt:
+            raise ValueError("No text is extracted from the image.")
+
+        # Parse the extracted text (CSV format) and create Anki notes one by one
+        anki_notes_list = []
+        rows = extracted_txt.splitlines()
+        for row in rows:
+            front, back = row.split(",")
+            anki_note = AnkiNote(
+                deckName=deck_name,
+                modelName=model_name,
+                front=front,
+                back=back,
+            )
+            anki_notes_list.append(anki_note)
 
         return cls(anki_notes=anki_notes_list)

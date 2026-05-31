@@ -1,6 +1,6 @@
 [project]
 name = "anki_card_create"
-version = "0.2.1"
+version = "0.2.2"
 description = ""
 readme = "README.md"
 packages = [
@@ -15,6 +15,9 @@ dependencies = [
     "pydantic-settings>=2.3.4",
     "deep-translator>=1.11.4",
     "pydantic-ai>=0.0.44",
+    "google-genai>=1.39.1",
+    "pillow>=11.3.0",
+    "python-dotenv>=1.0.1",
 ]
 
 [build-system]
