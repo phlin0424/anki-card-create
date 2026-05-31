@@ -1,6 +1,8 @@
 import logging
+import os
 from pathlib import Path
 
+from dotenv import load_dotenv
 from pydantic import BaseModel, ConfigDict
 
 from anki_card_create.config import settings
@@ -10,6 +12,9 @@ from anki_card_create.services.image_txt_extractor import ImageTxtExtractor
 from anki_card_create.services.translators import TranslationTool
 
 logging.basicConfig(level=logging.INFO)
+load_dotenv()
+
+api_key = os.getenv("API_KEY")
 
 
 class KankiInput(BaseModel):
@@ -156,7 +161,7 @@ class KankiInput(BaseModel):
 
         """
         # Extract text from image
-        extractor = ImageTxtExtractor()
+        extractor = ImageTxtExtractor(api_key=api_key)
         extracted_txt: str | None = extractor.extract_text(img_path=input_img_path)
 
         if not extracted_txt:

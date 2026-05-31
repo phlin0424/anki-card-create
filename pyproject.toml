@@ -17,6 +17,7 @@ dependencies = [
     "pydantic-ai>=0.0.44",
     "google-genai>=1.39.1",
     "pillow>=11.3.0",
+    "python-dotenv>=1.0.1",
 ]
 
 [build-system]
