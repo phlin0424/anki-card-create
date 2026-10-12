@@ -10,7 +10,7 @@ def global_data() -> dict[str, Path | str | list[str]]:
     return {
         "dir_path": Path(__file__).resolve().parent,
         "test_word": "안녕하세요",
-        "test_word_in_txt": ["죄송합니다", "이거 얼마예요"],
+        "test_word_in_txt": ["죄송합니다,こんにちは", "이거 얼마예요,これいくらですか"],
         "test_file_name": "test_data.txt",
         "deck_name": "test",
         "model_name": "Basic (裏表反転カード付き)+sentense",
@@ -70,7 +70,7 @@ def setup_anki_mock(mocker, response_anki_note):
 
 @pytest.fixture(scope="module")
 def create_test_data(global_data) -> None:
-    """Create the test data at the file path being specified"""
+    """Create the test data at the file path being specified."""
     input_word = global_data["test_word_in_txt"]
     file_path = global_data["dir_path"] / global_data["test_file_name"]
     with open(file_path, "w") as f:
@@ -84,6 +84,7 @@ def create_test_data(global_data) -> None:
 
 @pytest.fixture(scope="module")
 def create_test_audio(global_data) -> str:
+    """Create the test audio."""
     tts = NaverTTS(global_data["test_word"])
     audio_name = global_data["dir_path"] / global_data["audio_name"]
     tts.save(audio_name)

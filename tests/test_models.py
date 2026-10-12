@@ -17,8 +17,8 @@ translator = TranslationTool(translator_settings)
 logger = logging.getLogger(__name__)
 
 
-def test_anki_note_model():
-    """TESTCASE1: Create a note by manually input the text"""
+def test_anki_note_model() -> None:
+    """TESTCASE1: Create a note by manually input the text."""
     note = AnkiNote(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
@@ -33,21 +33,23 @@ def test_anki_note_model():
     assert note.frontLang == "ko"
 
 
-def test_anki_note_model_no_back():
-    """TESTCASE2: Create a note by manually input the text without back"""
+def test_anki_note_model_no_back() -> None:
+    """TESTCASE2: Create a note by manually input the text without back."""
     note = AnkiNote(
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
         front="안녕하세요",
+        back="こんにちは",
     )
 
     assert note.deckName == "korean"
     assert note.modelName == "Basic (裏表反転カード付き)+sentense"
     assert note.front == "안녕하세요"
     assert note.frontLang == "ko"
+    assert note.back == "こんにちは"
 
 
-def test_create_anki_notes_from_txt(global_data, create_test_data):
+def test_create_anki_notes_from_txt(global_data, create_test_data) -> None:
     """TESTCASE3: Create anki notes from a given txt file."""
     logger.info("TESTCASE3")
     logger.info(global_data["dir_path"] / global_data["test_file_name"])
@@ -63,13 +65,15 @@ def test_create_anki_notes_from_txt(global_data, create_test_data):
     # assert anki_notes[1].back == translator.translate("이거 얼마예요")
 
 
-def test_create_anki_notes_from_input(global_data):
-    """TESTCASE4: Create anki notes from a single input"""
+def test_create_anki_notes_from_input(global_data) -> None:
+    """TESTCASE4: Create anki notes from a single input."""
     anki_notes = KankiInput.from_input_word(
         input_str="죄송합니다",
         deck_name=global_data["deck_name"],
         model_name=global_data["model_name"],
+        translated_word="こんにちは",
     ).anki_notes
     assert len(anki_notes) == 1
     assert anki_notes[0].front == "죄송합니다"
+    assert anki_notes[0].back == "こんにちは"
     # assert anki_notes[0].back == translator.translate("죄송합니다")
