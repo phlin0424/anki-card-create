@@ -1,6 +1,6 @@
 [project]
 name = "anki_card_create"
-version = "0.2.3"
+version = "0.2.4"
 description = ""
 readme = "README.md"
 packages = [
