@@ -39,14 +39,12 @@ def test_anki_note_model_no_back() -> None:
         deckName="korean",
         modelName="Basic (裏表反転カード付き)+sentense",
         front="안녕하세요",
-        back="こんにちは",
     )
 
     assert note.deckName == "korean"
     assert note.modelName == "Basic (裏表反転カード付き)+sentense"
     assert note.front == "안녕하세요"
     assert note.frontLang == "ko"
-    assert note.back == "こんにちは"
 
 
 def test_create_anki_notes_from_txt(global_data, create_test_data) -> None:
